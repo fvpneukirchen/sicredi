@@ -1,12 +1,10 @@
 package fabio.sicredi.evaluation.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
@@ -21,8 +19,8 @@ public class Poll {
 
     private String status;
 
-    public Poll(final String reason) {
-        this.reason = reason;
-        this.status = PollStatus.CLOSED.getStatus();
-    }
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Duration duration;
+
 }
