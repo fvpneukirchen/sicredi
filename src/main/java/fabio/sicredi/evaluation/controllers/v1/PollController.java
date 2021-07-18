@@ -47,7 +47,7 @@ public class PollController {
         try {
             PollDTO returnedPoll = pollService.findPoll(id);
 
-            if (!returnedPoll.getStatus().equals(PollStatus.CREATED.getStatus())) throw new PollAlreadyOpenException();
+            if (isNull(returnedPoll) || !PollStatus.CREATED.getStatus().equals(returnedPoll.getStatus())) throw new PollAlreadyOpenException();
 
             int affectedPol = pollService.openPoll(id, pollDTO);
 
@@ -71,11 +71,11 @@ public class PollController {
         try {
             PollDTO returnedPoll = pollService.findPoll(id);
 
-            if (returnedPoll.getStatus().equals(PollStatus.CREATED.getStatus())) throw new PollNotOpenException();
+            if (PollStatus.CREATED.getStatus().equals(returnedPoll.getStatus())) throw new PollNotOpenException();
 
             VoteResultDTO voteResultDTO = voteService.countVotes(returnedPoll);
 
-            if(isNull(voteResultDTO)) throw new Exception();
+            if (isNull(voteResultDTO)) throw new Exception();
 
             return ResponseEntity.status(HttpStatus.OK).body(voteResultDTO);
 

@@ -2,8 +2,10 @@ package fabio.sicredi.evaluation.controllers.v1;
 
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
 import fabio.sicredi.evaluation.api.v1.model.UserDTO;
+import fabio.sicredi.evaluation.api.v1.model.UserStatusDTO;
 import fabio.sicredi.evaluation.api.v1.model.VoteDTO;
 import fabio.sicredi.evaluation.domain.PollStatus;
+import fabio.sicredi.evaluation.domain.UserStatus;
 import fabio.sicredi.evaluation.exception.PollNotFoundException;
 import fabio.sicredi.evaluation.exception.UserNotFoundException;
 import fabio.sicredi.evaluation.services.PollService;
@@ -36,7 +38,8 @@ public class VoteControllerTest extends AbstractRestControllerTest {
     public static final Long ID = 1L;
     public static final String NAME = "John";
     public static final String REASON = "Sell stocks";
-
+    public static final String ABLE_TO_VOTE = "ABLE_TO_VOTE";
+    public static final String UNABLE_TO_VOTE = "UNABLE_TO_VOTE";
 
     @Mock
     PollService pollService;
@@ -69,7 +72,9 @@ public class VoteControllerTest extends AbstractRestControllerTest {
         returnPollDTO.setReason(REASON);
         returnPollDTO.setStatus(PollStatus.OPEN.getStatus());
 
-        UserDTO userDTO = new UserDTO(ID, NAME);
+        UserDTO userDTO = new UserDTO(ID, 31260008002L, NAME);
+        UserStatusDTO userStatusDTO = new UserStatusDTO(ABLE_TO_VOTE);
+        when(userService.ableToVote(anyLong())).thenReturn(userStatusDTO);
 
         when(pollService.findPoll(anyLong())).thenReturn(returnPollDTO);
         when(userService.findUser(anyLong())).thenReturn(userDTO);
@@ -173,10 +178,12 @@ public class VoteControllerTest extends AbstractRestControllerTest {
         returnPollDTO.setReason(REASON);
         returnPollDTO.setStatus(PollStatus.OPEN.getStatus());
 
-        UserDTO userDTO = new UserDTO(ID, NAME);
+        UserDTO userDTO = new UserDTO(ID, 31260008002L, NAME);
+        UserStatusDTO userStatusDTO = new UserStatusDTO(ABLE_TO_VOTE);
 
         when(pollService.findPoll(anyLong())).thenReturn(returnPollDTO);
         when(userService.findUser(anyLong())).thenReturn(userDTO);
+        when(userService.ableToVote(anyLong())).thenReturn(userStatusDTO);
         when(voteService.hasVoted(any())).thenReturn(true);
 
         //when/then
@@ -196,10 +203,12 @@ public class VoteControllerTest extends AbstractRestControllerTest {
         returnPollDTO.setReason(REASON);
         returnPollDTO.setStatus(PollStatus.OPEN.getStatus());
 
-        UserDTO userDTO = new UserDTO(ID, NAME);
+        UserDTO userDTO = new UserDTO(ID, 31260008002L, NAME);
+        UserStatusDTO userStatusDTO = new UserStatusDTO(ABLE_TO_VOTE);
 
         when(pollService.findPoll(anyLong())).thenReturn(returnPollDTO);
         when(userService.findUser(anyLong())).thenReturn(userDTO);
+        when(userService.ableToVote(anyLong())).thenReturn(userStatusDTO);
         when(voteService.hasVoted(any())).thenReturn(false);
 
         //when/then
@@ -207,5 +216,29 @@ public class VoteControllerTest extends AbstractRestControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(voteDTO)))
                 .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void failsToRegisterNewVoteDueVoteUserVoteStatusIsUnable() throws Exception {
+        //given
+        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+
+        PollDTO returnPollDTO = new PollDTO();
+        returnPollDTO.setId(ID);
+        returnPollDTO.setReason(REASON);
+        returnPollDTO.setStatus(PollStatus.OPEN.getStatus());
+
+        UserDTO userDTO = new UserDTO(ID, 31260008002L, NAME);
+        UserStatusDTO userStatusDTO = new UserStatusDTO(UNABLE_TO_VOTE);
+
+        when(pollService.findPoll(anyLong())).thenReturn(returnPollDTO);
+        when(userService.findUser(anyLong())).thenReturn(userDTO);
+        when(userService.ableToVote(anyLong())).thenReturn(userStatusDTO);
+
+        //when/then
+        mockMvc.perform(post("/api/v1/votes/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(voteDTO)))
+                .andExpect(status().isPreconditionFailed());
     }
 }

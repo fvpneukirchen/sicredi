@@ -7,11 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO {
-
-    private Long id;
-
-    private Long cpf;
-
-    private String name;
+public class UserStatusDTO {
+    private String status;
 }

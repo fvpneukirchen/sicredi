@@ -5,8 +5,6 @@ import fabio.sicredi.evaluation.domain.Duration;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 public class PollDTO {

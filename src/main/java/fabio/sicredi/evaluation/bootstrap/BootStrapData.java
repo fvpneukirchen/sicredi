@@ -15,17 +15,20 @@ public class BootStrapData implements CommandLineRunner {
     private UserRepository userRepository;
 
     @Override
-    public void run(String ...args) {
+    public void run(String... args) {
 
         log.info("Started app");
 
-        User u1 = new User("John");
-        User u2 = new User("Paul");
+        User u1 = new User("John", 31260008002L);
+        User u2 = new User("Paul", 79228342099L);
+        User u3 = new User("Jack", 44468646020L);
 
         u1 = userRepository.save(u1);
         u2 = userRepository.save(u2);
+        u3 = userRepository.save(u3);
 
         log.info(String.format("User %s created", u1.getName()));
         log.info(String.format("User %s created", u2.getName()));
+        log.info(String.format("User %s created", u3.getName()));
     }
 }

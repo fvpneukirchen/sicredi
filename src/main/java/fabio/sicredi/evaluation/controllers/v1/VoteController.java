@@ -2,11 +2,14 @@ package fabio.sicredi.evaluation.controllers.v1;
 
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
 import fabio.sicredi.evaluation.api.v1.model.UserDTO;
+import fabio.sicredi.evaluation.api.v1.model.UserStatusDTO;
 import fabio.sicredi.evaluation.api.v1.model.VoteDTO;
 import fabio.sicredi.evaluation.domain.PollStatus;
+import fabio.sicredi.evaluation.domain.UserStatus;
 import fabio.sicredi.evaluation.exception.PollNotFoundException;
 import fabio.sicredi.evaluation.exception.PollNotOpenException;
 import fabio.sicredi.evaluation.exception.UserNotFoundException;
+import fabio.sicredi.evaluation.exception.UserUnableToVoteException;
 import fabio.sicredi.evaluation.exception.VoteAlreadyRegisteredException;
 import fabio.sicredi.evaluation.services.PollService;
 import fabio.sicredi.evaluation.services.UserService;
@@ -41,9 +44,16 @@ public class VoteController {
         try {
             PollDTO returnedPollDTO = pollService.findPoll(voteDTO.getPollId());
 
-            if(!returnedPollDTO.getStatus().equals(PollStatus.OPEN.getStatus())) throw new PollNotOpenException();
+            if (!PollStatus.OPEN.getStatus().equals(returnedPollDTO.getStatus())) throw new PollNotOpenException();
 
             UserDTO returnedUserDTO = userService.findUser(voteDTO.getUserId());
+
+            UserStatusDTO userStatusDTO = userService.ableToVote(returnedUserDTO.getCpf());
+
+            if (isNull(userStatusDTO) || UserStatus.UNABLE.getStatus().equals(userStatusDTO.getStatus())) {
+                log.warn(String.format("User [%d] vote status is [%s]", returnedUserDTO.getId(), userStatusDTO.getStatus()));
+                throw new UserUnableToVoteException();
+            }
 
             boolean hasVoted = voteService.hasVoted(voteDTO);
 
@@ -51,14 +61,14 @@ public class VoteController {
 
             VoteDTO registeredVote = voteService.registerVote(voteDTO);
 
-            if(isNull(registeredVote)) throw new Exception();
+            if (isNull(registeredVote)) throw new Exception();
 
             log.debug(String.format("User ID [%d] has Voted [%s] for Poll Id [%d]", returnedUserDTO.getId(), registeredVote.isInAccordance() ? "YES" : "NO", registeredVote.getPollId()));
             return ResponseEntity.status(HttpStatus.CREATED).body(registeredVote);
 
         } catch (PollNotFoundException | UserNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (PollNotOpenException | VoteAlreadyRegisteredException e) {
+        } catch (PollNotOpenException | VoteAlreadyRegisteredException | UserUnableToVoteException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
