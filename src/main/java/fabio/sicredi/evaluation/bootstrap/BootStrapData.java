@@ -11,22 +11,21 @@ import org.springframework.stereotype.Component;
 @Log4j2
 public class BootStrapData implements CommandLineRunner {
 
+    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    public void setUserRepository(final UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
     @Override
-    public void run(String ...args) throws Exception {
+    public void run(String ...args) {
 
         log.info("Started app");
 
-        User u = new User("John");
+        User u1 = new User("John");
+        User u2 = new User("Paul");
 
-        u = userRepository.save(u);
+        u1 = userRepository.save(u1);
+        u2 = userRepository.save(u2);
 
-        log.info(String.format("User %s created", u.getName()));
+        log.info(String.format("User %s created", u1.getName()));
+        log.info(String.format("User %s created", u2.getName()));
     }
 }

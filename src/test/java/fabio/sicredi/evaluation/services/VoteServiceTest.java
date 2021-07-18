@@ -1,7 +1,12 @@
 package fabio.sicredi.evaluation.services;
 
+import fabio.sicredi.evaluation.api.v1.mapper.PollMapper;
 import fabio.sicredi.evaluation.api.v1.mapper.VoteMapper;
+import fabio.sicredi.evaluation.api.v1.model.PollDTO;
+import fabio.sicredi.evaluation.api.v1.model.ResultDTO;
 import fabio.sicredi.evaluation.api.v1.model.VoteDTO;
+import fabio.sicredi.evaluation.api.v1.model.VoteResultDTO;
+import fabio.sicredi.evaluation.domain.PollStatus;
 import fabio.sicredi.evaluation.domain.Vote;
 import fabio.sicredi.evaluation.repositories.VoteRepository;
 import org.junit.jupiter.api.Assertions;
@@ -13,6 +18,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -21,8 +29,11 @@ import static org.mockito.Mockito.when;
 public class VoteServiceTest {
 
     public static final Long ID = 1L;
+    public static final String REASON = "Sell stocks";
 
     VoteServiceImpl voteService;
+
+    PollMapper pollMapper =PollMapper.INSTANCE;
 
     VoteMapper voteMapper = VoteMapper.INSTANCE;
 
@@ -34,6 +45,7 @@ public class VoteServiceTest {
         MockitoAnnotations.openMocks(this);
 
         voteService = new VoteServiceImpl();
+        voteService.setPollMapper(pollMapper);
         voteService.setVoteMapper(voteMapper);
         voteService.setVoteRepository(voteRepository);
     }
@@ -84,5 +96,36 @@ public class VoteServiceTest {
 
         //then
         Assertions.assertFalse(hasVoted);
+    }
+
+    @Test
+    public void countVotes() {
+        //given
+        PollDTO pollDTO = new PollDTO();
+        pollDTO.setId(ID);
+        pollDTO.setReason(REASON);
+        pollDTO.setStatus(PollStatus.CLOSED.getStatus());
+
+        List<Object[]> results = new ArrayList<>();
+
+        Object[] yesVotes = new Object[2];
+        yesVotes[0] = true;
+        yesVotes[1] = 1L;
+
+        List<ResultDTO> resultDTOS = new ArrayList<>();
+        resultDTOS.add(new ResultDTO("YES", 1L));
+
+        results.add(yesVotes);
+
+        when(voteRepository.countVotes(any())).thenReturn(results);
+
+        //when
+        VoteResultDTO voteResultDTO = voteService.countVotes(pollDTO);
+
+        //then
+        Assertions.assertEquals(pollDTO.getId(), voteResultDTO.getId());
+        Assertions.assertEquals(pollDTO.getStatus(), voteResultDTO.getStatus());
+        Assertions.assertEquals(pollDTO.getReason(), voteResultDTO.getReason());
+        Assertions.assertEquals(resultDTOS, voteResultDTO.getResult());
     }
 }

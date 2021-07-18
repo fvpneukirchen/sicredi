@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import static java.util.Objects.isNull;
+
 @Controller
 @RequestMapping("api/v1/votes")
 @Log4j2
@@ -48,6 +50,8 @@ public class VoteController {
             if (hasVoted) throw new VoteAlreadyRegisteredException();
 
             VoteDTO registeredVote = voteService.registerVote(voteDTO);
+
+            if(isNull(registeredVote)) throw new Exception();
 
             log.debug(String.format("User ID [%d] has Voted [%s] for Poll Id [%d]", returnedUserDTO.getId(), registeredVote.isInAccordance() ? "YES" : "NO", registeredVote.getPollId()));
             return ResponseEntity.status(HttpStatus.CREATED).body(registeredVote);

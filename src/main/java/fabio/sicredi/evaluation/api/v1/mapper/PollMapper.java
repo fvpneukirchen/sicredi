@@ -1,6 +1,7 @@
 package fabio.sicredi.evaluation.api.v1.mapper;
 
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
+import fabio.sicredi.evaluation.api.v1.model.VoteResultDTO;
 import fabio.sicredi.evaluation.domain.Poll;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -13,4 +14,6 @@ public interface PollMapper {
     PollDTO pollToPollDTO(final Poll poll);
 
     Poll pollDTOtoPoll(final PollDTO pollDTO);
+
+    VoteResultDTO pollDTOtoVoteResultDTO(final PollDTO pollDTO);
 }
