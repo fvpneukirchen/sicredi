@@ -74,7 +74,7 @@ public class PollControllerTest extends AbstractRestControllerTest {
     }
 
     @Test
-    public void createNewPollFailsDueMissingReason() throws Exception {
+    public void failsToCreateNewPollDueMissingReason() throws Exception {
         //given
         PollDTO pollDTO = new PollDTO();
 

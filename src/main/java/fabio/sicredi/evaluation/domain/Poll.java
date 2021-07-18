@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -22,5 +23,8 @@ public class Poll {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Duration duration;
+
+    @OneToMany(mappedBy = "poll")
+    private Set<Vote> users;
 
 }

@@ -27,6 +27,7 @@ import static java.util.Objects.isNull;
 public class PollServiceImpl implements PollService {
 
     private PollMapper pollMapper;
+
     private PollRepository pollRepository;
 
     @Autowired
@@ -35,13 +36,12 @@ public class PollServiceImpl implements PollService {
     }
 
     @Autowired
-    public void setCustomerRepository(PollRepository pollRepository) {
+    public void setPollRepository(PollRepository pollRepository) {
         this.pollRepository = pollRepository;
     }
 
     @Override
     public PollDTO createPoll(final PollDTO pollDTO) {
-
         Poll poll = pollMapper.pollDTOtoPoll(pollDTO);
         poll.setStatus(PollStatus.CREATED.getStatus());
 
@@ -51,39 +51,39 @@ public class PollServiceImpl implements PollService {
     }
 
     @Override
-    public PollDTO findPoll(final Long id) {
+    public PollDTO findPoll(final Long id) throws PollNotFoundException {
         Poll returnedPoll = pollRepository.findById(id).orElseThrow(PollNotFoundException::new);
-
         return pollMapper.pollToPollDTO(returnedPoll);
     }
 
 
     @Override
-    public int openPoll(final Long id, final Duration duration) {
+    public int openPoll(final Long id, final PollDTO pollDTO) {
         int affectedPolls = pollRepository.updateStatus(id, PollStatus.OPEN.getStatus());
-        if (affectedPolls == 1) closeOpenedPoll(id, duration);
+        if (affectedPolls == 1) closeOpenedPoll(id, pollDTO);
 
         return affectedPolls;
     }
 
-    private void closeOpenedPoll(final Long id, final Duration duration) {
-        log.trace("Scheduling closure of Poll: " + id);
+    private void closeOpenedPoll(final Long id, final PollDTO pollDTO) {
+        log.trace(String.format("Scheduling closure of Poll [%d]", id));
 
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-        Duration checkedDuration = checkDuration(duration);
+        Duration checkedDuration = checkDuration(pollDTO);
+        log.debug(String.format("Poll [%d] will close in %d %s", id, checkedDuration.getDelay(), checkedDuration.getTimeUnit().name()));
 
         Runnable task = () -> {
-            log.debug("Closing Poll: " + id);
+            log.debug(String.format("Closing Poll [%d]", id));
 
             int affectedPolls = pollRepository.updateStatus(id, PollStatus.CLOSED.getStatus());
 
             if (affectedPolls == 1) {
-                log.debug(String.format("Poll %d is now CLOSED", id));
+                log.debug(String.format("Poll [%d] is now CLOSED", id));
             } else if (affectedPolls > 1) {
-                log.warn(String.format("Something went wrong when closing the Poll %d", id));
+                log.warn(String.format("Something went wrong when closing the Poll [%d]", id));
             } else {
-                log.warn(String.format("Poll %d not closed", id));
+                log.warn(String.format("Poll [%d] not closed", id));
             }
         };
 
@@ -91,10 +91,10 @@ public class PollServiceImpl implements PollService {
         executor.shutdown();
     }
 
-    private Duration checkDuration(final Duration duration) {
-        if (isNull(duration) || duration.getDelay() <= 0 || duration.getTimeUnit() == null)
+    private Duration checkDuration(final PollDTO pollDTO) {
+        if (isNull(pollDTO) || isNull(pollDTO.getDuration()) || pollDTO.getDuration().getDelay() <= 0 || pollDTO.getDuration().getTimeUnit() == null)
             return new Duration(1, TimeUnit.MINUTES);
 
-        return duration;
+        return pollDTO.getDuration();
     }
 }

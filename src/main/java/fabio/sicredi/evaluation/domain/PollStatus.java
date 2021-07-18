@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum PollStatus {
+
     CREATED("CREATED"),
     OPEN("OPEN"),
     CLOSED("CLOSED");

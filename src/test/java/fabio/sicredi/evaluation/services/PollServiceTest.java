@@ -44,12 +44,11 @@ public class PollServiceTest {
 
         pollService = new PollServiceImpl();
         pollService.setPollMapper(pollMapper);
-        pollService.setCustomerRepository(pollRepository);
+        pollService.setPollRepository(pollRepository);
     }
 
     @Test
     public void createPoll() {
-
         //given
         PollDTO pollDTO = new PollDTO();
         pollDTO.setReason(REASON);
@@ -70,7 +69,6 @@ public class PollServiceTest {
 
     @Test
     public void fetchPoll() {
-
         //given
         Poll savedPoll = new Poll();
         savedPoll.setId(ID);
@@ -90,7 +88,6 @@ public class PollServiceTest {
 
     @Test
     public void failsToFetchPoll() {
-
         //given
         when(pollRepository.findById(anyLong())).thenReturn(java.util.Optional.empty());
 
@@ -103,7 +100,6 @@ public class PollServiceTest {
 
     @Test
     public void opensPollWithOutDuration() {
-
         //given
         when(pollRepository.updateStatus(anyLong(), anyString())).thenReturn(1);
 
@@ -116,12 +112,14 @@ public class PollServiceTest {
 
     @Test
     public void opensPollWithDuration() {
-
         //given
+        PollDTO pollDTO = new PollDTO();
+        pollDTO.setDuration(new Duration(5, TimeUnit.SECONDS));
+
         when(pollRepository.updateStatus(anyLong(), anyString())).thenReturn(1);
 
         //when
-        int affected = pollService.openPoll(ID, new Duration(5, TimeUnit.SECONDS));
+        int affected = pollService.openPoll(ID, pollDTO);
 
         //then
         Assertions.assertEquals(1, affected);

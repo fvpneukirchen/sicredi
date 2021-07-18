@@ -28,14 +28,14 @@ public class PollController {
     }
 
     @PatchMapping(path = "/{id}")
-    public ResponseEntity openPoll(@PathVariable("id") final Long id, @RequestBody final PollDTO pollDTO) {
+    public ResponseEntity openPoll(@PathVariable("id") final Long id, @RequestBody(required = false) final PollDTO pollDTO) {
 
         try {
             PollDTO returnedPoll = pollService.findPoll(id);
 
             if (!returnedPoll.getStatus().equals(PollStatus.CREATED.getStatus())) throw new PollAlreadyOpenException();
 
-            int affectedPol = pollService.openPoll(id, pollDTO.getDuration());
+            int affectedPol = pollService.openPoll(id, pollDTO);
 
             if (affectedPol != 1) throw new Exception();
 
