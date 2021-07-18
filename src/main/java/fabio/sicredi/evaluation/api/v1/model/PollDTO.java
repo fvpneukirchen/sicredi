@@ -5,6 +5,8 @@ import fabio.sicredi.evaluation.domain.Duration;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 public class PollDTO {
@@ -18,4 +20,6 @@ public class PollDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Duration duration;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<ResultDTO> result;
 }

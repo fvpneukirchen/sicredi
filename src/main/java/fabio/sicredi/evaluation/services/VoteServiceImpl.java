@@ -5,7 +5,6 @@ import fabio.sicredi.evaluation.api.v1.mapper.VoteMapper;
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
 import fabio.sicredi.evaluation.api.v1.model.ResultDTO;
 import fabio.sicredi.evaluation.api.v1.model.VoteDTO;
-import fabio.sicredi.evaluation.api.v1.model.VoteResultDTO;
 import fabio.sicredi.evaluation.domain.Vote;
 import fabio.sicredi.evaluation.domain.VoteKey;
 import fabio.sicredi.evaluation.repositories.VoteRepository;
@@ -57,14 +56,12 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteResultDTO countVotes(final PollDTO pollDTO) {
-        VoteResultDTO voteResultDTO = pollMapper.pollDTOtoVoteResultDTO(pollDTO);
-
+    public PollDTO countVotes(final PollDTO pollDTO) {
         List<Object[]> votes = voteRepository.countVotes(pollDTO.getId());
 
-        voteResultDTO.setResult(convertVotesIntoResultDTO(votes));
+        pollDTO.setResult(convertVotesIntoResultDTO(votes));
 
-        return voteResultDTO;
+        return pollDTO;
     }
 
     private List<ResultDTO> convertVotesIntoResultDTO(final List<Object[]> votes) {

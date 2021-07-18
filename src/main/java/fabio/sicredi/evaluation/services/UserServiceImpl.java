@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -50,7 +51,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserStatusDTO ableToVote(final Long cpf) {
-        String url = String.format(externalCpfUrl, cpf);
-        return restTemplate.getForObject(url, UserStatusDTO.class);
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(externalCpfUrl)
+                .path(String.valueOf(cpf));
+        return restTemplate.getForObject(builder.toUriString(), UserStatusDTO.class);
     }
 }

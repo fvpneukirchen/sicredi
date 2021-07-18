@@ -5,7 +5,6 @@ import fabio.sicredi.evaluation.api.v1.mapper.VoteMapper;
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
 import fabio.sicredi.evaluation.api.v1.model.ResultDTO;
 import fabio.sicredi.evaluation.api.v1.model.VoteDTO;
-import fabio.sicredi.evaluation.api.v1.model.VoteResultDTO;
 import fabio.sicredi.evaluation.domain.PollStatus;
 import fabio.sicredi.evaluation.domain.Vote;
 import fabio.sicredi.evaluation.repositories.VoteRepository;
@@ -120,12 +119,12 @@ public class VoteServiceTest {
         when(voteRepository.countVotes(any())).thenReturn(results);
 
         //when
-        VoteResultDTO voteResultDTO = voteService.countVotes(pollDTO);
+        PollDTO pollDTOwithResult = voteService.countVotes(pollDTO);
 
         //then
-        Assertions.assertEquals(pollDTO.getId(), voteResultDTO.getId());
-        Assertions.assertEquals(pollDTO.getStatus(), voteResultDTO.getStatus());
-        Assertions.assertEquals(pollDTO.getReason(), voteResultDTO.getReason());
-        Assertions.assertEquals(resultDTOS, voteResultDTO.getResult());
+        Assertions.assertEquals(pollDTO.getId(), pollDTOwithResult.getId());
+        Assertions.assertEquals(pollDTO.getStatus(), pollDTOwithResult.getStatus());
+        Assertions.assertEquals(pollDTO.getReason(), pollDTOwithResult.getReason());
+        Assertions.assertEquals(resultDTOS, pollDTOwithResult.getResult());
     }
 }

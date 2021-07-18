@@ -2,7 +2,6 @@ package fabio.sicredi.evaluation.controllers.v1;
 
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
 import fabio.sicredi.evaluation.api.v1.model.ResultDTO;
-import fabio.sicredi.evaluation.api.v1.model.VoteResultDTO;
 import fabio.sicredi.evaluation.domain.Duration;
 import fabio.sicredi.evaluation.domain.PollStatus;
 import fabio.sicredi.evaluation.exception.PollNotFoundException;
@@ -214,7 +213,7 @@ public class PollControllerTest extends AbstractRestControllerTest {
         resultDTOS.add(new ResultDTO(YES, 1L));
         resultDTOS.add(new ResultDTO(NO, 1L));
 
-        VoteResultDTO voteResultDTO = new VoteResultDTO();
+        PollDTO voteResultDTO = new PollDTO();
         voteResultDTO.setId(returnedPollDTO.getId());
         voteResultDTO.setReason(returnedPollDTO.getReason());
         voteResultDTO.setStatus(returnedPollDTO.getStatus());

@@ -1,7 +1,6 @@
 package fabio.sicredi.evaluation.controllers.v1;
 
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
-import fabio.sicredi.evaluation.api.v1.model.VoteResultDTO;
 import fabio.sicredi.evaluation.domain.PollStatus;
 import fabio.sicredi.evaluation.exception.PollAlreadyOpenException;
 import fabio.sicredi.evaluation.exception.PollNotFoundException;
@@ -47,7 +46,8 @@ public class PollController {
         try {
             PollDTO returnedPoll = pollService.findPoll(id);
 
-            if (isNull(returnedPoll) || !PollStatus.CREATED.getStatus().equals(returnedPoll.getStatus())) throw new PollAlreadyOpenException();
+            if (isNull(returnedPoll) || !PollStatus.CREATED.getStatus().equals(returnedPoll.getStatus()))
+                throw new PollAlreadyOpenException();
 
             int affectedPol = pollService.openPoll(id, pollDTO);
 
@@ -73,7 +73,7 @@ public class PollController {
 
             if (PollStatus.CREATED.getStatus().equals(returnedPoll.getStatus())) throw new PollNotOpenException();
 
-            VoteResultDTO voteResultDTO = voteService.countVotes(returnedPoll);
+            PollDTO voteResultDTO = voteService.countVotes(returnedPoll);
 
             if (isNull(voteResultDTO)) throw new Exception();
 

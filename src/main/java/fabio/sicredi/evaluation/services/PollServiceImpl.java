@@ -6,6 +6,7 @@ import fabio.sicredi.evaluation.domain.Duration;
 import fabio.sicredi.evaluation.domain.Poll;
 import fabio.sicredi.evaluation.domain.PollStatus;
 import fabio.sicredi.evaluation.exception.PollNotFoundException;
+import fabio.sicredi.evaluation.jms.sender.PollResultSender;
 import fabio.sicredi.evaluation.repositories.PollRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +32,8 @@ public class PollServiceImpl implements PollService {
 
     private PollRepository pollRepository;
 
+    private PollResultSender pollResultSender;
+
     @Autowired
     public void setPollMapper(PollMapper pollMapper) {
         this.pollMapper = pollMapper;
@@ -38,6 +42,11 @@ public class PollServiceImpl implements PollService {
     @Autowired
     public void setPollRepository(PollRepository pollRepository) {
         this.pollRepository = pollRepository;
+    }
+
+    @Autowired
+    public void setPollResultSender(PollResultSender pollResultSender) {
+        this.pollResultSender = pollResultSender;
     }
 
     @Override
@@ -77,14 +86,7 @@ public class PollServiceImpl implements PollService {
             log.debug(String.format("Closing Poll [%d]", id));
 
             int affectedPolls = pollRepository.updateStatus(id, PollStatus.CLOSED.getStatus());
-
-            if (affectedPolls == 1) {
-                log.debug(String.format("Poll [%d] is now CLOSED", id));
-            } else if (affectedPolls > 1) {
-                log.warn(String.format("Something went wrong when closing the Poll [%d]", id));
-            } else {
-                log.warn(String.format("Poll [%d] not closed", id));
-            }
+            validatePollClosure(id, affectedPolls, checkedDuration);
         };
 
         executor.schedule(task, checkedDuration.getDelay(), checkedDuration.getTimeUnit());
@@ -96,5 +98,22 @@ public class PollServiceImpl implements PollService {
             return new Duration(1, TimeUnit.MINUTES);
 
         return pollDTO.getDuration();
+    }
+
+    private void validatePollClosure(final Long id, final int affectedPolls, final Duration duration) {
+        if (affectedPolls == 1) {
+            log.debug(String.format("Poll [%d] is now CLOSED", id));
+            Optional<Poll> closedPoll = pollRepository.findById(id);
+            if (closedPoll.isPresent()) {
+                PollDTO closedPollDTO = pollMapper.pollToPollDTO(closedPoll.get());
+                closedPollDTO.setDuration(duration);
+                pollResultSender.sendMessage(closedPollDTO);
+            }
+
+        } else if (affectedPolls > 1) {
+            log.warn(String.format("Something went wrong when closing the Poll [%d]", id));
+        } else {
+            log.warn(String.format("Poll [%d] not closed", id));
+        }
     }
 }
