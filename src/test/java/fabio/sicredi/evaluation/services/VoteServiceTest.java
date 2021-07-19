@@ -59,7 +59,7 @@ public class VoteServiceTest {
         when(voteRepository.save(any())).thenReturn(saveVote);
 
         //when
-        VoteDTO saveDTO = voteService.registerVote(voteDTO);
+        VoteDTO saveDTO = voteService.registerVote(ID, voteDTO);
 
         //then
         Assertions.assertEquals(voteDTO.getPollId(), saveDTO.getPollId());
@@ -77,7 +77,7 @@ public class VoteServiceTest {
         when(voteRepository.findById(any())).thenReturn(java.util.Optional.of(saveVote));
 
         //when
-        boolean hasVoted = voteService.hasVoted(voteDTO);
+        boolean hasVoted = voteService.hasVoted(ID, voteDTO);
 
         //then
         Assertions.assertTrue(hasVoted);
@@ -91,7 +91,7 @@ public class VoteServiceTest {
         when(voteRepository.findById(any())).thenReturn(java.util.Optional.empty());
 
         //when
-        boolean hasVoted = voteService.hasVoted(voteDTO);
+        boolean hasVoted = voteService.hasVoted(ID, voteDTO);
 
         //then
         Assertions.assertFalse(hasVoted);
@@ -119,12 +119,12 @@ public class VoteServiceTest {
         when(voteRepository.countVotes(any())).thenReturn(results);
 
         //when
-        PollDTO pollDTOwithResult = voteService.countVotes(pollDTO);
+        PollDTO pollDTOWithResult = voteService.countVotes(pollDTO);
 
         //then
-        Assertions.assertEquals(pollDTO.getId(), pollDTOwithResult.getId());
-        Assertions.assertEquals(pollDTO.getStatus(), pollDTOwithResult.getStatus());
-        Assertions.assertEquals(pollDTO.getReason(), pollDTOwithResult.getReason());
-        Assertions.assertEquals(resultDTOS, pollDTOwithResult.getResult());
+        Assertions.assertEquals(pollDTO.getId(), pollDTOWithResult.getId());
+        Assertions.assertEquals(pollDTO.getStatus(), pollDTOWithResult.getStatus());
+        Assertions.assertEquals(pollDTO.getReason(), pollDTOWithResult.getReason());
+        Assertions.assertEquals(resultDTOS, pollDTOWithResult.getResult());
     }
 }

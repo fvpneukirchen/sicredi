@@ -4,6 +4,7 @@ import fabio.sicredi.evaluation.api.v1.mapper.UserMapper;
 import fabio.sicredi.evaluation.api.v1.model.UserDTO;
 import fabio.sicredi.evaluation.api.v1.model.UserStatusDTO;
 import fabio.sicredi.evaluation.domain.User;
+import fabio.sicredi.evaluation.exception.InvalidCPFFormatException;
 import fabio.sicredi.evaluation.exception.UserNotFoundException;
 import fabio.sicredi.evaluation.repositories.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.when;
 public class UserServiceTest {
 
     public static final Long ID = 1L;
+    public static final Long CPF = 31260008002L;
     public static final String NAME = "John";
     public static final String ABLE_TO_VOTE = "ABLE_TO_VOTE";
     public static final String UNABLE_TO_VOTE = "UNABLE_TO_VOTE";
@@ -80,7 +82,7 @@ public class UserServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(java.util.Optional.empty());
 
         //when
-        NoSuchElementException thrown = Assertions.assertThrows(UserNotFoundException.class, () -> userService.findUser(ID));
+        UserNotFoundException thrown = Assertions.assertThrows(UserNotFoundException.class, () -> userService.findUser(ID));
 
         //then
         Assertions.assertNotNull(thrown);
@@ -116,4 +118,42 @@ public class UserServiceTest {
         Assertions.assertEquals(UNABLE_TO_VOTE, returnedUserStatusDTO.getStatus());
     }
 
+    @Test
+    public void addUser() {
+        //given
+        User savedUser = new User();
+        savedUser.setId(ID);
+        savedUser.setName(NAME);
+        savedUser.setCpf(CPF);
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(ID);
+        userDTO.setName(NAME);
+        userDTO.setCpf(CPF);
+
+        when(userRepository.save(any())).thenReturn(savedUser);
+
+        //when
+        UserDTO returnedUserDTO = userService.addUser(userDTO);
+
+        //then
+        Assertions.assertEquals(ID, returnedUserDTO.getId());
+        Assertions.assertEquals(NAME, returnedUserDTO.getName());
+        Assertions.assertEquals(CPF, returnedUserDTO.getCpf());
+    }
+
+    @Test
+    public void failsToAddUserDueInvalidCPF() {
+        //given
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(ID);
+        userDTO.setName(NAME);
+        userDTO.setCpf(ID);
+
+        //when
+        InvalidCPFFormatException thrown = Assertions.assertThrows(InvalidCPFFormatException.class, () -> userService.addUser(userDTO));
+
+        //then
+        Assertions.assertNotNull(thrown);
+    }
 }

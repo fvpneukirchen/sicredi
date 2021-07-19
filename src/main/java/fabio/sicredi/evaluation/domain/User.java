@@ -2,7 +2,9 @@ package fabio.sicredi.evaluation.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,6 +21,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(unique = true)
     private Long cpf;
 
     private String name;
@@ -26,8 +29,8 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<Vote> polls;
 
-    public User(final String name, final Long cpf) {
-        this.name = name;
-        this.cpf = cpf;
+    public boolean hasValidCpf() {
+        String regex = "\\d{11}";
+        return  String.valueOf(this.cpf).matches(regex);
     }
 }

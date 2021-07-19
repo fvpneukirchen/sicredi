@@ -41,8 +41,9 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteDTO registerVote(final VoteDTO voteDTO) {
+    public VoteDTO registerVote(final Long id, final VoteDTO voteDTO) {
         Vote vote = voteMapper.voteDTOtoVote(voteDTO);
+        vote.setPollId(id);
 
         Vote registeredVote = voteRepository.save(vote);
 
@@ -50,8 +51,8 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public boolean hasVoted(final VoteDTO voteDTO) {
-        VoteKey voteKey = new VoteKey(voteDTO.getPollId(), voteDTO.getUserId());
+    public boolean hasVoted(final Long id, final VoteDTO voteDTO) {
+        VoteKey voteKey = new VoteKey(id, voteDTO.getUserId());
         return voteRepository.findById(voteKey).isPresent();
     }
 

@@ -92,7 +92,7 @@ public class PollServiceTest {
         when(pollRepository.findById(anyLong())).thenReturn(java.util.Optional.empty());
 
         //when
-        NoSuchElementException thrown = Assertions.assertThrows(PollNotFoundException.class, () -> pollService.findPoll(ID));
+        PollNotFoundException thrown = Assertions.assertThrows(PollNotFoundException.class, () -> pollService.findPoll(ID));
 
         //then
         Assertions.assertNotNull(thrown);

@@ -4,6 +4,7 @@ import fabio.sicredi.evaluation.api.v1.mapper.UserMapper;
 import fabio.sicredi.evaluation.api.v1.model.UserDTO;
 import fabio.sicredi.evaluation.api.v1.model.UserStatusDTO;
 import fabio.sicredi.evaluation.domain.User;
+import fabio.sicredi.evaluation.exception.InvalidCPFFormatException;
 import fabio.sicredi.evaluation.exception.UserNotFoundException;
 import fabio.sicredi.evaluation.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,13 @@ public class UserServiceImpl implements UserService {
 
     public void setUserExternalCpfUrl(final String externalCpfUrl) {
         this.externalCpfUrl = externalCpfUrl;
+    }
+
+    @Override
+    public UserDTO addUser(final UserDTO userDTO) throws InvalidCPFFormatException {
+        User user = userMapper.userDtoToUser(userDTO);
+        if(!user.hasValidCpf()) throw new InvalidCPFFormatException();
+        return userMapper.userToUserDTO(userRepository.save(user));
     }
 
     @Override
