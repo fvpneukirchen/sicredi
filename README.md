@@ -7,7 +7,7 @@ This project is part of hiring process for SICREDI Application Developer job.
 - Maven
 
 ### Running application
-Once you have Maven and Java 8 installed locally you just need to run ``mvn clean spring-boot:run`` to test it.
+Once you have Maven and Java 11 installed locally you just need to run ``mvn clean spring-boot:run`` to test it.
 After this, you can proceed with tests and verify services documentation in the follow URL:
 - SWAGGER: [http://localhost:8080/swagger-ui](http://localhost:8080/swagger-ui)
 
@@ -40,10 +40,10 @@ I opted to an in-memory embedded ``ActiveMQ`` because it is easy to work with.
 For service documentation I used ``Swagger``, adding descriptions to the services exposed.
 
 ### API Versioning
-I'm following ``URI Versioning`` and this can be easily achieved using proper mappers. For this project, ``mapstruct`` [https://mapstruct.org/](https://mapstruct.org/) is being used to generate mapper between DTO and Entities.
+I'm following ``URI Versioning`` and this can be easily achieved using proper mappers. For this project, ``mapstruct`` [https://mapstruct.org/](https://mapstruct.org/) is used to automatically generate mappers between DTOs and Entities.
 
 ### Lombok
-This project uses ``Lombok`` [https://projectlombok.org/](https://projectlombok.org/) which automatically generates  boilerplate code.
+This project uses ``Lombok`` [https://projectlombok.org/](https://projectlombok.org/) which automatically generates boilerplate code.
 
 ### Logging
 This project uses the Annotation ``@Log4j2`` from ``Lombok``.
