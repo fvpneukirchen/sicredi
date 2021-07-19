@@ -2,7 +2,6 @@ package fabio.sicredi.evaluation.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

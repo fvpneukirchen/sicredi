@@ -1,6 +1,7 @@
 package fabio.sicredi.evaluation.services;
 
 import fabio.sicredi.evaluation.api.v1.mapper.PollMapper;
+import fabio.sicredi.evaluation.api.v1.model.DurationDTO;
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
 import fabio.sicredi.evaluation.domain.Duration;
 import fabio.sicredi.evaluation.domain.Poll;
@@ -113,13 +114,13 @@ public class PollServiceTest {
     @Test
     public void opensPollWithDuration() {
         //given
-        PollDTO pollDTO = new PollDTO();
-        pollDTO.setDuration(new Duration(5, TimeUnit.SECONDS));
+        DurationDTO durationDTO = new DurationDTO();
+        durationDTO.setDuration(new Duration(5, TimeUnit.SECONDS));
 
         when(pollRepository.updateStatus(anyLong(), anyString())).thenReturn(1);
 
         //when
-        int affected = pollService.openPoll(ID, pollDTO);
+        int affected = pollService.openPoll(ID, durationDTO);
 
         //then
         Assertions.assertEquals(1, affected);

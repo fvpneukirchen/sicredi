@@ -1,7 +1,9 @@
 package fabio.sicredi.evaluation.jms.sender;
 
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
+import fabio.sicredi.evaluation.api.v1.model.PollResultDTO;
 import fabio.sicredi.evaluation.config.JmsConfig;
+import fabio.sicredi.evaluation.domain.Duration;
 import fabio.sicredi.evaluation.jms.model.PollResultMessage;
 import fabio.sicredi.evaluation.services.VoteService;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +20,17 @@ import java.util.UUID;
 public class PollResultSender {
 
     private final JmsTemplate jmsTemplate;
+
     @Autowired
     private VoteService voteService;
 
-    public void sendMessage(final PollDTO pollDTO) {
+    public void sendMessage(final PollDTO pollDTO, final Duration duration) {
 
         log.trace(String.format("Received Poll [%d] closure notification", pollDTO.getId()));
 
-        PollDTO voteResultDTO = voteService.countVotes(pollDTO);
+
+        PollResultDTO voteResultDTO = voteService.countVotes(pollDTO);
+        voteResultDTO.setDuration(duration);
 
         log.debug(String.format("Poll [%d] closure results collected", pollDTO.getId()));
 

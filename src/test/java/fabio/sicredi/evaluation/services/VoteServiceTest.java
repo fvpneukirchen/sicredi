@@ -3,8 +3,10 @@ package fabio.sicredi.evaluation.services;
 import fabio.sicredi.evaluation.api.v1.mapper.PollMapper;
 import fabio.sicredi.evaluation.api.v1.mapper.VoteMapper;
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
+import fabio.sicredi.evaluation.api.v1.model.PollResultDTO;
 import fabio.sicredi.evaluation.api.v1.model.ResultDTO;
 import fabio.sicredi.evaluation.api.v1.model.VoteDTO;
+import fabio.sicredi.evaluation.api.v1.model.VoteEntryDTO;
 import fabio.sicredi.evaluation.domain.PollStatus;
 import fabio.sicredi.evaluation.domain.Vote;
 import fabio.sicredi.evaluation.repositories.VoteRepository;
@@ -52,32 +54,32 @@ public class VoteServiceTest {
     @Test
     public void registeredVote() {
         //given
-        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
 
         Vote saveVote = new Vote(ID, ID, true);
 
         when(voteRepository.save(any())).thenReturn(saveVote);
 
         //when
-        VoteDTO saveDTO = voteService.registerVote(ID, voteDTO);
+        VoteDTO saveDTO = voteService.registerVote(ID, voteEntryDTO);
 
         //then
-        Assertions.assertEquals(voteDTO.getPollId(), saveDTO.getPollId());
-        Assertions.assertEquals(voteDTO.getUserId(), saveDTO.getUserId());
-        Assertions.assertEquals(voteDTO.isInAccordance(), saveDTO.isInAccordance());
+        Assertions.assertEquals(ID, saveDTO.getPollId());
+        Assertions.assertEquals(voteEntryDTO.getUserId(), saveDTO.getUserId());
+        Assertions.assertEquals(voteEntryDTO.isInAccordance(), saveDTO.isInAccordance());
     }
 
     @Test
     public void hasVotedAlreadyExistentVote() {
         //given
-        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
 
         Vote saveVote = new Vote(ID, ID, true);
 
         when(voteRepository.findById(any())).thenReturn(java.util.Optional.of(saveVote));
 
         //when
-        boolean hasVoted = voteService.hasVoted(ID, voteDTO);
+        boolean hasVoted = voteService.hasVoted(ID, voteEntryDTO);
 
         //then
         Assertions.assertTrue(hasVoted);
@@ -86,12 +88,12 @@ public class VoteServiceTest {
     @Test
     public void hasVotedNonExistentVote() {
         //given
-        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
 
         when(voteRepository.findById(any())).thenReturn(java.util.Optional.empty());
 
         //when
-        boolean hasVoted = voteService.hasVoted(ID, voteDTO);
+        boolean hasVoted = voteService.hasVoted(ID, voteEntryDTO);
 
         //then
         Assertions.assertFalse(hasVoted);
@@ -119,7 +121,7 @@ public class VoteServiceTest {
         when(voteRepository.countVotes(any())).thenReturn(results);
 
         //when
-        PollDTO pollDTOWithResult = voteService.countVotes(pollDTO);
+        PollResultDTO pollDTOWithResult = voteService.countVotes(pollDTO);
 
         //then
         Assertions.assertEquals(pollDTO.getId(), pollDTOWithResult.getId());

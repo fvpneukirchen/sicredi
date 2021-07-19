@@ -1,6 +1,7 @@
 package fabio.sicredi.evaluation.services;
 
 import fabio.sicredi.evaluation.api.v1.mapper.PollMapper;
+import fabio.sicredi.evaluation.api.v1.model.DurationDTO;
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
 import fabio.sicredi.evaluation.domain.Duration;
 import fabio.sicredi.evaluation.domain.Poll;
@@ -67,14 +68,14 @@ public class PollServiceImpl implements PollService {
 
 
     @Override
-    public int openPoll(final Long id, final PollDTO pollDTO) {
+    public int openPoll(final Long id, final DurationDTO pollDTO) {
         int affectedPolls = pollRepository.updateStatus(id, PollStatus.OPEN.getStatus());
         if (affectedPolls == 1) closeOpenedPoll(id, pollDTO);
 
         return affectedPolls;
     }
 
-    private void closeOpenedPoll(final Long id, final PollDTO pollDTO) {
+    private void closeOpenedPoll(final Long id, final DurationDTO pollDTO) {
         log.trace(String.format("Scheduling closure of Poll [%d]", id));
 
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -93,7 +94,7 @@ public class PollServiceImpl implements PollService {
         executor.shutdown();
     }
 
-    private Duration checkDuration(final PollDTO pollDTO) {
+    private Duration checkDuration(final DurationDTO pollDTO) {
         if (isNull(pollDTO) || isNull(pollDTO.getDuration()) || pollDTO.getDuration().getDelay() <= 0 || pollDTO.getDuration().getTimeUnit() == null)
             return new Duration(1, TimeUnit.MINUTES);
 
@@ -106,8 +107,7 @@ public class PollServiceImpl implements PollService {
             Optional<Poll> closedPoll = pollRepository.findById(id);
             if (closedPoll.isPresent()) {
                 PollDTO closedPollDTO = pollMapper.pollToPollDTO(closedPoll.get());
-                closedPollDTO.setDuration(duration);
-                pollResultSender.sendMessage(closedPollDTO);
+                pollResultSender.sendMessage(closedPollDTO, duration);
             }
 
         } else if (affectedPolls > 1) {

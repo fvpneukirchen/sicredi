@@ -3,8 +3,10 @@ package fabio.sicredi.evaluation.services;
 import fabio.sicredi.evaluation.api.v1.mapper.PollMapper;
 import fabio.sicredi.evaluation.api.v1.mapper.VoteMapper;
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
+import fabio.sicredi.evaluation.api.v1.model.PollResultDTO;
 import fabio.sicredi.evaluation.api.v1.model.ResultDTO;
 import fabio.sicredi.evaluation.api.v1.model.VoteDTO;
+import fabio.sicredi.evaluation.api.v1.model.VoteEntryDTO;
 import fabio.sicredi.evaluation.domain.Vote;
 import fabio.sicredi.evaluation.domain.VoteKey;
 import fabio.sicredi.evaluation.repositories.VoteRepository;
@@ -41,8 +43,8 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteDTO registerVote(final Long id, final VoteDTO voteDTO) {
-        Vote vote = voteMapper.voteDTOtoVote(voteDTO);
+    public VoteDTO registerVote(final Long id, final VoteEntryDTO voteEntryDTO) {
+        Vote vote = voteMapper.voteEntryDTOtoVote(voteEntryDTO);
         vote.setPollId(id);
 
         Vote registeredVote = voteRepository.save(vote);
@@ -51,18 +53,19 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public boolean hasVoted(final Long id, final VoteDTO voteDTO) {
-        VoteKey voteKey = new VoteKey(id, voteDTO.getUserId());
+    public boolean hasVoted(final Long id, final VoteEntryDTO voteEntryDTO) {
+        VoteKey voteKey = new VoteKey(id, voteEntryDTO.getUserId());
         return voteRepository.findById(voteKey).isPresent();
     }
 
     @Override
-    public PollDTO countVotes(final PollDTO pollDTO) {
+    public PollResultDTO countVotes(final PollDTO pollDTO) {
         List<Object[]> votes = voteRepository.countVotes(pollDTO.getId());
 
-        pollDTO.setResult(convertVotesIntoResultDTO(votes));
+        PollResultDTO resultDTO = pollMapper.pollDTOToPollResultDTO(pollDTO);
+        resultDTO.setResult(convertVotesIntoResultDTO(votes));
 
-        return pollDTO;
+        return resultDTO;
     }
 
     private List<ResultDTO> convertVotesIntoResultDTO(final List<Object[]> votes) {

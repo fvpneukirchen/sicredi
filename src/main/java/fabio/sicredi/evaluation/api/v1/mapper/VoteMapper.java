@@ -1,6 +1,7 @@
 package fabio.sicredi.evaluation.api.v1.mapper;
 
 import fabio.sicredi.evaluation.api.v1.model.VoteDTO;
+import fabio.sicredi.evaluation.api.v1.model.VoteEntryDTO;
 import fabio.sicredi.evaluation.domain.Vote;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -11,5 +12,7 @@ public interface VoteMapper {
 
     VoteDTO voteToVoteDTO(final Vote vote);
 
-    Vote voteDTOtoVote(final VoteDTO voteDTO);
+    Vote voteEntryDTOtoVote(final VoteEntryDTO voteEntryDTO);
+
+
 }

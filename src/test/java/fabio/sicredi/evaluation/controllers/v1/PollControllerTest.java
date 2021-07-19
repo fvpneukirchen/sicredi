@@ -1,10 +1,13 @@
 package fabio.sicredi.evaluation.controllers.v1;
 
+import fabio.sicredi.evaluation.api.v1.model.DurationDTO;
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
+import fabio.sicredi.evaluation.api.v1.model.PollResultDTO;
 import fabio.sicredi.evaluation.api.v1.model.ResultDTO;
 import fabio.sicredi.evaluation.api.v1.model.UserDTO;
 import fabio.sicredi.evaluation.api.v1.model.UserStatusDTO;
 import fabio.sicredi.evaluation.api.v1.model.VoteDTO;
+import fabio.sicredi.evaluation.api.v1.model.VoteEntryDTO;
 import fabio.sicredi.evaluation.domain.Duration;
 import fabio.sicredi.evaluation.domain.PollStatus;
 import fabio.sicredi.evaluation.exception.PollNotFoundException;
@@ -113,8 +116,8 @@ public class PollControllerTest extends AbstractRestControllerTest {
     @Test
     public void openPoll() throws Exception {
         //given
-        PollDTO pollDTO = new PollDTO();
-        pollDTO.setDuration(new Duration(5, SECONDS));
+        DurationDTO durationDTO = new DurationDTO();
+        durationDTO.setDuration(new Duration(5, SECONDS));
 
         PollDTO returnedDTO = new PollDTO();
         returnedDTO.setId(ID);
@@ -128,7 +131,7 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //then
         mockMvc.perform(patch(URL_POLLS_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(pollDTO)))
+                .content(asJsonString(durationDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.reason", is(REASON)))
@@ -138,8 +141,8 @@ public class PollControllerTest extends AbstractRestControllerTest {
     @Test
     public void failsNotFindingPollToOpen() throws Exception {
         //given
-        PollDTO pollDTO = new PollDTO();
-        pollDTO.setDuration(new Duration(5, SECONDS));
+        DurationDTO durationDTO = new DurationDTO();
+        durationDTO.setDuration(new Duration(5, SECONDS));
 
         //when
         when(pollService.findPoll(anyLong())).thenThrow(PollNotFoundException.class);
@@ -147,15 +150,15 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //then
         mockMvc.perform(patch(URL_POLLS_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(pollDTO)))
+                .content(asJsonString(durationDTO)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void failsTryingToOpenAlreadyOpenedPoll() throws Exception {
         //given
-        PollDTO pollDTO = new PollDTO();
-        pollDTO.setDuration(new Duration(5, SECONDS));
+        DurationDTO durationDTO = new DurationDTO();
+        durationDTO.setDuration(new Duration(5, SECONDS));
 
         PollDTO returnedDTO = new PollDTO();
         returnedDTO.setId(ID);
@@ -168,15 +171,15 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //then
         mockMvc.perform(patch(URL_POLLS_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(pollDTO)))
+                .content(asJsonString(durationDTO)))
                 .andExpect(status().isPreconditionFailed());
     }
 
     @Test
     public void failsTryingToOpenAlreadyClosedPoll() throws Exception {
         //given
-        PollDTO pollDTO = new PollDTO();
-        pollDTO.setDuration(new Duration(5, SECONDS));
+        DurationDTO durationDTO = new DurationDTO();
+        durationDTO.setDuration(new Duration(5, SECONDS));
 
         PollDTO returnedDTO = new PollDTO();
         returnedDTO.setId(ID);
@@ -189,15 +192,15 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //then
         mockMvc.perform(patch(URL_POLLS_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(pollDTO)))
+                .content(asJsonString(durationDTO)))
                 .andExpect(status().isPreconditionFailed());
     }
 
     @Test
     public void failsNotOpeningPoll() throws Exception {
         //given
-        PollDTO pollDTO = new PollDTO();
-        pollDTO.setDuration(new Duration(5, SECONDS));
+        DurationDTO durationDTO = new DurationDTO();
+        durationDTO.setDuration(new Duration(5, SECONDS));
 
         PollDTO returnedDTO = new PollDTO();
         returnedDTO.setId(ID);
@@ -211,7 +214,7 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //then
         mockMvc.perform(patch(URL_POLLS_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(pollDTO)))
+                .content(asJsonString(durationDTO)))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -227,7 +230,7 @@ public class PollControllerTest extends AbstractRestControllerTest {
         resultDTOS.add(new ResultDTO(YES, 1L));
         resultDTOS.add(new ResultDTO(NO, 1L));
 
-        PollDTO voteResultDTO = new PollDTO();
+        PollResultDTO voteResultDTO = new PollResultDTO();
         voteResultDTO.setId(returnedPollDTO.getId());
         voteResultDTO.setReason(returnedPollDTO.getReason());
         voteResultDTO.setStatus(returnedPollDTO.getStatus());
@@ -294,6 +297,7 @@ public class PollControllerTest extends AbstractRestControllerTest {
     @Test
     public void registerNewVote() throws Exception {
         //given
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
         VoteDTO voteDTO = new VoteDTO(ID, ID, true);
 
         PollDTO returnPollDTO = new PollDTO();
@@ -313,7 +317,7 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //when/then
         mockMvc.perform(post(URL_VOTES)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(voteDTO)))
+                .content(asJsonString(voteEntryDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.pollId", is(1)))
                 .andExpect(jsonPath("$.userId", is(1)))
@@ -323,7 +327,7 @@ public class PollControllerTest extends AbstractRestControllerTest {
     @Test
     public void failsToRegisterNewVoteDueMissingPoll() throws Exception {
         //given
-        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
 
         PollDTO returnPollDTO = new PollDTO();
         returnPollDTO.setId(ID);
@@ -335,14 +339,14 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //when/then
         mockMvc.perform(post(URL_VOTES)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(voteDTO)))
+                .content(asJsonString(voteEntryDTO)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void failsToRegisterNewVoteDueMissingUser() throws Exception {
         //given
-        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
 
         PollDTO returnPollDTO = new PollDTO();
         returnPollDTO.setId(ID);
@@ -355,14 +359,14 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //when/then
         mockMvc.perform(post(URL_VOTES)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(voteDTO)))
+                .content(asJsonString(voteEntryDTO)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void failsToRegisterNewVoteDuePollAlreadyClosed() throws Exception {
         //given
-        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
 
         PollDTO returnPollDTO = new PollDTO();
         returnPollDTO.setId(ID);
@@ -374,14 +378,14 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //when/then
         mockMvc.perform(post(URL_VOTES)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(voteDTO)))
+                .content(asJsonString(voteEntryDTO)))
                 .andExpect(status().isPreconditionFailed());
     }
 
     @Test
     public void failsToRegisterNewVoteDuePollNotOpened() throws Exception {
         //given
-        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
 
         PollDTO returnPollDTO = new PollDTO();
         returnPollDTO.setId(ID);
@@ -393,14 +397,14 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //when/then
         mockMvc.perform(post(URL_VOTES)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(voteDTO)))
+                .content(asJsonString(voteEntryDTO)))
                 .andExpect(status().isPreconditionFailed());
     }
 
     @Test
     public void failsToRegisterNewVoteDuePolAlreadyVoted() throws Exception {
         //given
-        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
 
         PollDTO returnPollDTO = new PollDTO();
         returnPollDTO.setId(ID);
@@ -418,14 +422,14 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //when/then
         mockMvc.perform(post(URL_VOTES)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(voteDTO)))
+                .content(asJsonString(voteEntryDTO)))
                 .andExpect(status().isPreconditionFailed());
     }
 
     @Test
     public void failsToRegisterNewVoteDueVoteNotBeenTriggered() throws Exception {
         //given
-        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
 
         PollDTO returnPollDTO = new PollDTO();
         returnPollDTO.setId(ID);
@@ -443,14 +447,14 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //when/then
         mockMvc.perform(post(URL_VOTES)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(voteDTO)))
+                .content(asJsonString(voteEntryDTO)))
                 .andExpect(status().isInternalServerError());
     }
 
     @Test
     public void failsToRegisterNewVoteDueVoteUserVoteStatusIsUnable() throws Exception {
         //given
-        VoteDTO voteDTO = new VoteDTO(ID, ID, true);
+        VoteEntryDTO voteEntryDTO = new VoteEntryDTO(ID, true);
 
         PollDTO returnPollDTO = new PollDTO();
         returnPollDTO.setId(ID);
@@ -467,7 +471,7 @@ public class PollControllerTest extends AbstractRestControllerTest {
         //when/then
         mockMvc.perform(post(URL_VOTES)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(voteDTO)))
+                .content(asJsonString(voteEntryDTO)))
                 .andExpect(status().isPreconditionFailed());
     }
 }

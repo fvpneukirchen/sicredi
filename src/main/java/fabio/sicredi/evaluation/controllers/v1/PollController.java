@@ -1,9 +1,12 @@
 package fabio.sicredi.evaluation.controllers.v1;
 
+import fabio.sicredi.evaluation.api.v1.model.DurationDTO;
 import fabio.sicredi.evaluation.api.v1.model.PollDTO;
+import fabio.sicredi.evaluation.api.v1.model.PollResultDTO;
 import fabio.sicredi.evaluation.api.v1.model.UserDTO;
 import fabio.sicredi.evaluation.api.v1.model.UserStatusDTO;
 import fabio.sicredi.evaluation.api.v1.model.VoteDTO;
+import fabio.sicredi.evaluation.api.v1.model.VoteEntryDTO;
 import fabio.sicredi.evaluation.domain.PollStatus;
 import fabio.sicredi.evaluation.domain.UserStatus;
 import fabio.sicredi.evaluation.exception.PollAlreadyOpenException;
@@ -74,18 +77,18 @@ public class PollController {
             @ApiResponse(code = 412, message = "A Precondition Failed will be thrown if the Poll is already opened for votes"),
             @ApiResponse(code = 500, message = "A Internal Server Error will be thrown if the system fails to open the Poll"),
     })
-    public ResponseEntity openPoll(@PathVariable("id") final Long id, @RequestBody(required = false) final PollDTO pollDTO) {
+    public ResponseEntity openPoll(@PathVariable("id") final Long id, @RequestBody(required = false) final DurationDTO durationDTO) {
 
         try {
             PollDTO returnedPoll = pollService.findPoll(id);
 
             if(!PollStatus.CREATED.getStatus().equals(returnedPoll.getStatus())) {
-                log.error(String.format("Poll [%d] not can not be opened, current status [%s]",
+                log.error(String.format("Poll [%d] can not be opened, current status [%s]",
                         returnedPoll.getId(), returnedPoll.getStatus()));
                 throw new PollAlreadyOpenException();
             }
 
-            int affectedPol = pollService.openPoll(id, pollDTO);
+            int affectedPol = pollService.openPoll(id, durationDTO);
 
             if (affectedPol != 1) throw new Exception();
 
@@ -118,7 +121,7 @@ public class PollController {
 
             if (PollStatus.CREATED.getStatus().equals(returnedPoll.getStatus())) throw new PollNotOpenException();
 
-            PollDTO voteResultDTO = voteService.countVotes(returnedPoll);
+            PollResultDTO voteResultDTO = voteService.countVotes(returnedPoll);
 
             if (isNull(voteResultDTO)) throw new Exception();
 
@@ -143,13 +146,13 @@ public class PollController {
             @ApiResponse(code = 412, message = "A Precondition Failed will be thrown if the Poll was not opened for votes, or there is an existent vote, or the User is unable to vote"),
             @ApiResponse(code = 500, message = "A Internal Server Error will be thrown if the system fails to register the Poll"),
     })
-    public ResponseEntity registerVote(@PathVariable("id") final Long id, @RequestBody final VoteDTO voteDTO) {
+    public ResponseEntity registerVote(@PathVariable("id") final Long id, @RequestBody final VoteEntryDTO voteEntryDTO) {
         try {
             PollDTO returnedPollDTO = pollService.findPoll(id);
 
             if (!PollStatus.OPEN.getStatus().equals(returnedPollDTO.getStatus())) throw new PollNotOpenException();
 
-            UserDTO returnedUserDTO = userService.findUser(voteDTO.getUserId());
+            UserDTO returnedUserDTO = userService.findUser(voteEntryDTO.getUserId());
 
             UserStatusDTO userStatusDTO = userService.ableToVote(returnedUserDTO.getCpf());
 
@@ -158,15 +161,15 @@ public class PollController {
                 throw new UserUnableToVoteException();
             }
 
-            boolean hasVoted = voteService.hasVoted(id, voteDTO);
+            boolean hasVoted = voteService.hasVoted(id, voteEntryDTO);
 
             if (hasVoted) throw new VoteAlreadyRegisteredException();
 
-            VoteDTO registeredVote = voteService.registerVote(id, voteDTO);
+            VoteDTO registeredVote = voteService.registerVote(id, voteEntryDTO);
 
             if (isNull(registeredVote)) throw new Exception();
 
-            log.debug(String.format("User ID [%d] has Voted [%s] for Poll Id [%d]", returnedUserDTO.getId(), registeredVote.isInAccordance() ? "YES" : "NO", registeredVote.getPollId()));
+            log.debug(String.format("User ID [%d] has Voted [%s] for Poll Id [%d]", returnedUserDTO.getId(), registeredVote.isInAccordance() ? "YES" : "NO", id));
             return ResponseEntity.status(HttpStatus.CREATED).body(registeredVote);
 
         } catch (PollNotFoundException e) {

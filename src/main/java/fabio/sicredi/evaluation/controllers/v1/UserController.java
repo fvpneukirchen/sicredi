@@ -1,6 +1,5 @@
 package fabio.sicredi.evaluation.controllers.v1;
 
-import fabio.sicredi.evaluation.api.v1.model.PollDTO;
 import fabio.sicredi.evaluation.api.v1.model.UserDTO;
 import fabio.sicredi.evaluation.exception.InvalidCPFFormatException;
 import fabio.sicredi.evaluation.services.UserService;
@@ -9,8 +8,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
